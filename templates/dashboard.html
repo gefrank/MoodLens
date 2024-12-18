@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MoodLens{% endblock %}
+
+{% block content %}
+<h1 class="text-center">MoodLens Dashboard</h1>
+<div class="row mt-4">
+    <div class="col">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Texts Analyzed</h5>
+                <p class="card-text">{{ total_texts }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Most Common Sentiment</h5>
+                <p class="card-text">{{ most_common_sentiment }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h2>Sentiment Counts</h2>
+    <ul class="list-group">
+        {% for sentiment, count in sentiment_counts.items() %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ sentiment }}
+            <span class="badge bg-primary rounded-pill">{{ count }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="mt-5">
+    <h2>Sentiment Distribution</h2>
+    <img src="data:image/png;base64,{{ chart_url }}" alt="Sentiment Chart" class="img-fluid">
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+Timestamp,Input Text,Sentiment,Confidence Score
+2024-12-18 11:58:51.625181,To do is a good day to learn python.,POSITIVE,1.00
+2024-12-18 11:59:18.700065,"Driving in the snow is very challenging.
+",POSITIVE,1.00
+2024-12-18 13:00:54.154376,My ass hurts.,NEGATIVE,1.00
+2024-12-18 13:05:28.871527,Does a dog have Buddha nature?,NEGATIVE,0.99
+2024-12-18 13:05:53.427439,My dog wags his tail!,NEGATIVE,0.61
+2024-12-18 13:06:16.519559,The happy man is never angry.,POSITIVE,1.00
+2024-12-18 13:06:26.309643,The angry man is never happy.,NEGATIVE,1.00
