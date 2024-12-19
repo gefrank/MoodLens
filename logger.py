@@ -5,6 +5,7 @@ from datetime import datetime
 
 LOG_FILE = "sentiment_logs.csv"
 
+
 def log_sentiment(text, label, score):
     """Logs sentiment analysis results to a CSV file."""
     # Check if log file exists; if not, create it with headers

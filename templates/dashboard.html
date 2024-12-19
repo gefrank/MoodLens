@@ -24,6 +24,30 @@
 </div>
 
 <div class="mt-5">
+    <h2>Filter Sentiments</h2>
+    <!-- Filter Form -->
+    <form method="GET" class="mb-4">
+        <label for="filter">Filter Sentiments:</label>
+        <select name="sentiment" id="filter" class="form-select w-25">
+            <option value="" {% if not request.args.get('sentiment') %}selected{% endif %}>All</option>
+            <option value="POSITIVE" {% if request.args.get('sentiment') == 'POSITIVE' %}selected{% endif %}>Positive</option>
+            <option value="NEGATIVE" {% if request.args.get('sentiment') == 'NEGATIVE' %}selected{% endif %}>Negative</option>
+            <option value="NEUTRAL" {% if request.args.get('sentiment') == 'NEUTRAL' %}selected{% endif %}>Neutral</option>
+        </select>
+        <label for="start_date">Start Date:</label>
+        <input type="date" name="start_date" class="form-control w-25"
+            value="{{ request.args.get('start_date') or '' }}">
+        <label for="end_date">End Date:</label>
+        <input type="date" name="end_date" class="form-control w-25"
+            value="{{ request.args.get('end_date') or '' }}">
+        <button type="submit" class="btn btn-primary mt-2">Apply Filter</button>
+        <a href="/dashboard" class="btn btn-light border" style="margin-top: 7px;">Clear Filter</a>
+        <a href="/export?start_date={{ request.args.get('start_date') or '' }}&end_date={{ request.args.get('end_date') or '' }}&sentiment={{ request.args.get('sentiment') or '' }}" 
+            class="btn btn-secondary" style="margin-top: 7px;">Export Filtered Data to CSV</a>
+    </form>
+</div>
+
+<div class="mt-5">
     <h2>Sentiment Counts</h2>
     <ul class="list-group">
         {% for sentiment, count in sentiment_counts.items() %}
@@ -39,4 +63,10 @@
     <h2>Sentiment Distribution</h2>
     <img src="data:image/png;base64,{{ chart_url }}" alt="Sentiment Chart" class="img-fluid">
 </div>
+
+<div class="mt-5">
+    <h2>Interactive Sentiment Trends Over Time</h2>
+    <div>{{ interactive_chart | safe }}</div>
+</div>
+
 {% endblock %}
