@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-from flask import Flask, request, render_template, Response
+from text_analyzer import TextAnalyzer
+from flask import Flask, request, render_template, Response, make_response
 from transformers import pipeline
 from logger import log_sentiment  # Import logging function
 
@@ -12,6 +13,13 @@ from io import BytesIO
 import base64
 import matplotlib.dates as mdates
 import plotly.express as px
+
+# Most common words
+from collections import Counter
+import string
+
+# Word cloud
+from wordcloud import WordCloud
 
 # Suppress symlink warning
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -85,6 +93,31 @@ def generate_interactive_line_chart(data):
     return fig.to_html(full_html=False)
 
 
+def get_average_confidence(data):
+    return data.groupby('Sentiment')['Confidence'].mean().to_dict()
+
+
+def generate_wordcloud(data, sentiment):
+    # Filter text by sentiment
+    text = " ".join(data[data['Sentiment'] == sentiment]['Input Text'])
+    
+    # Generate the word cloud
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+    
+    # Save the word cloud to a BytesIO object
+    img = BytesIO()
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.tight_layout()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    
+    # Convert to Base64 for rendering in HTML
+    return base64.b64encode(img.getvalue()).decode('utf8')
+
+
 @app.route('/dashboard')
 def dashboard():
     log_file = "sentiment_logs.csv"
@@ -112,13 +145,32 @@ def dashboard():
 
     interactive_chart = generate_interactive_line_chart(data)
 
+    # Generate most frequent words
+    positive_words = TextAnalyzer.get_most_frequent_words(data, 'POSITIVE')
+    negative_words = TextAnalyzer.get_most_frequent_words(data, 'NEGATIVE')
+    neutral_words = TextAnalyzer.get_most_frequent_words(data, 'NEUTRAL')
+
+    # Generate word clouds
+    positive_wordcloud = TextAnalyzer.generate_wordcloud(data, "POSITIVE")
+    negative_wordcloud = TextAnalyzer.generate_wordcloud(data, "NEGATIVE")
+    neutral_wordcloud = TextAnalyzer.generate_wordcloud(data, "NEUTRAL")    
+
+    avg_confidence = get_average_confidence(data)
+
     return render_template(
         'dashboard.html',
         total_texts=total_texts,
         most_common_sentiment=most_common_sentiment,
         sentiment_counts=sentiment_counts,
         chart_url=chart_url,
-        interactive_chart=interactive_chart
+        interactive_chart=interactive_chart,
+        positive_words=positive_words,
+        negative_words=negative_words,
+        neutral_words=neutral_words,
+        positive_wordcloud=positive_wordcloud,
+        negative_wordcloud=negative_wordcloud,
+        neutral_wordcloud=neutral_wordcloud,        
+        avg_confidence=avg_confidence,        
     )
 
 
@@ -142,7 +194,7 @@ def export_csv():
         data = data[data['Timestamp'] <= end_date]
     if sentiment and sentiment != "None":
         data = data[data['Sentiment'].str.upper() == sentiment.upper()]
-        
+
     # Debug: Print filtered data
     print("Filtered Data:\n", data)
 
@@ -159,6 +211,18 @@ def export_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment;filename=filtered_sentiments.csv"}
     )
+
+@app.route("/download_wordcloud")
+def download_wordcloud():
+    sentiment = request.args.get("sentiment")
+    # Load the dataset (adjust path if necessary)
+    data = pd.read_csv("sentiment_logs.csv")
+    wordcloud_img = TextAnalyzer.generate_wordcloud(data, sentiment)
+    img_bytes = base64.b64decode(wordcloud_img)
+    response = make_response(img_bytes)
+    response.headers.set("Content-Type", "image/png")
+    response.headers.set("Content-Disposition", f"attachment; filename={sentiment}_wordcloud.png")
+    return response
 
 
 if __name__ == "__main__":

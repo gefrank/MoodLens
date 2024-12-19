@@ -69,4 +69,56 @@
     <div>{{ interactive_chart | safe }}</div>
 </div>
 
+<div class="mt-5">
+    <h2>Most Frequent Words</h2>
+    <h4>Positive Sentiments</h4>
+    <ul>
+        {% for word, count in positive_words %}
+        <li>{{ word }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+    <h4>Negative Sentiments</h4>
+    <ul>
+        {% for word, count in negative_words %}
+        <li>{{ word }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+    <h4>Neutral Sentiments</h4>
+    <ul>
+        {% for word, count in neutral_words %}
+        <li>{{ word }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="mt-5">
+    <h2>Average Confidence Scores</h2>
+    <ul>
+        {% for sentiment, score in avg_confidence.items() %}
+        <li>{{ sentiment }}: {{ score | round(2) }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="mt-5">
+    <h2>Word Clouds</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Positive Sentiments</h4>
+            <img src="data:image/png;base64,{{ positive_wordcloud }}" alt="Positive Word Cloud" class="img-fluid">
+            <a href="/download_wordcloud?sentiment=POSITIVE" class="btn btn-primary">Download</a>
+        </div>
+        <div class="col-md-4">
+            <h4>Negative Sentiments</h4>
+            <img src="data:image/png;base64,{{ negative_wordcloud }}" alt="Negative Word Cloud" class="img-fluid">
+            <a href="/download_wordcloud?sentiment=NEGATIVE" class="btn btn-danger">Download</a>
+        </div>
+        <div class="col-md-4">
+            <h4>Neutral Sentiments</h4>
+            <img src="data:image/png;base64,{{ neutral_wordcloud }}" alt="Neutral Word Cloud" class="img-fluid">
+            <a href="/download_wordcloud?sentiment=NEUTRAL" class="btn btn-secondary">Download</a>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
