@@ -1,10 +1,8 @@
-# logger.py
-import csv
+import csv  # Missing import added
 import os
 from datetime import datetime
 
 LOG_FILE = "sentiment_logs.csv"
-
 
 def log_sentiment(text, label, score):
     """Logs sentiment analysis results to a CSV file."""
@@ -17,4 +15,6 @@ def log_sentiment(text, label, score):
     # Append new data to the log file
     with open(LOG_FILE, "a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([datetime.now(), text, label, f"{score:.2f}"])
+        # Format datetime to match existing records
+        formatted_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        writer.writerow([formatted_time, text, label, f"{score:.2f}"])
