@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, render_template
+from flask_login import login_required
 import pandas as pd
 from modules.services.visualization_service import (
     generate_chart,
@@ -11,6 +12,7 @@ from modules.utilities.text_analyzer import TextAnalyzer
 dashboard_routes = Blueprint('dashboard', __name__)
 
 @dashboard_routes.route("/")
+@login_required
 def dashboard():
     log_file = "logs/sentiment_logs.csv"
     if not os.path.exists(log_file):
