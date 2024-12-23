@@ -3,9 +3,47 @@
 {% block title %}Dashboard - MoodLens{% endblock %}
 
 {% block content %}
-<h1 class="text-center">MoodLens Dashboard</h1>
-<div class="row mt-4">
-    <div class="col">
+<h1 class="text-center text-primary my-4">MoodLens Dashboard</h1>
+
+<!-- Filter Section -->
+<div class="mt-3">
+
+    <form method="GET" class="row g-3 mb-4 align-items-center">
+        <!-- Filter Sentiments Dropdown -->
+        <div class="col-auto">
+            <label for="filter" class="form-label">Filter Sentiments:</label>
+            <select name="sentiment" id="filter" class="form-select" style="width: 175px;">
+                <option value="" {% if not request.args.get('sentiment') %}selected{% endif %}>All</option>
+                <option value="POSITIVE" {% if request.args.get('sentiment') == 'POSITIVE' %}selected{% endif %}>Positive</option>
+                <option value="NEGATIVE" {% if request.args.get('sentiment') == 'NEGATIVE' %}selected{% endif %}>Negative</option>
+                <option value="NEUTRAL" {% if request.args.get('sentiment') == 'NEUTRAL' %}selected{% endif %}>Neutral</option>
+            </select>
+        </div>
+
+        <!-- Start Date -->
+        <div class="col-auto">
+            <label for="start_date" class="form-label">Start Date:</label>
+            <input type="date" name="start_date" class="form-control" style="width: 175px;" value="{{ request.args.get('start_date') or '' }}">
+        </div>
+
+        <!-- End Date -->
+        <div class="col-auto">
+            <label for="end_date" class="form-label">End Date:</label>
+            <input type="date" name="end_date" class="form-control" style="width: 175px;" value="{{ request.args.get('end_date') or '' }}">
+        </div>
+        
+        <!-- Buttons -->
+        <div class="d-flex">
+            <button type="submit" class="btn btn-primary me-2" style="width: 150px; height: 38px;">Apply Filter</button>
+            <a href="/dashboard" class="btn btn-secondary me-2" style="width: 150px; height: 38px;">Clear Filter</a>
+            <a href="/export?start_date={{ request.args.get('start_date') or '' }}&end_date={{ request.args.get('end_date') or '' }}&sentiment={{ request.args.get('sentiment') or '' }}" class="btn btn-success" style="width: 150px; height: 38px;">Download CSV</a>
+        </div>
+    </form>
+</div>
+
+<!-- Overview Section -->
+<div class="row">
+    <div class="col-md-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title">Total Texts Analyzed</h5>
@@ -13,7 +51,7 @@
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col-md-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title">Most Common Sentiment</h5>
@@ -21,104 +59,92 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="mt-5">
-    <h2>Filter Sentiments</h2>
-    <!-- Filter Form -->
-    <form method="GET" class="mb-4">
-        <label for="filter">Filter Sentiments:</label>
-        <select name="sentiment" id="filter" class="form-select w-25">
-            <option value="" {% if not request.args.get('sentiment') %}selected{% endif %}>All</option>
-            <option value="POSITIVE" {% if request.args.get('sentiment') == 'POSITIVE' %}selected{% endif %}>Positive</option>
-            <option value="NEGATIVE" {% if request.args.get('sentiment') == 'NEGATIVE' %}selected{% endif %}>Negative</option>
-            <option value="NEUTRAL" {% if request.args.get('sentiment') == 'NEUTRAL' %}selected{% endif %}>Neutral</option>
-        </select>
-        <label for="start_date">Start Date:</label>
-        <input type="date" name="start_date" class="form-control w-25"
-            value="{{ request.args.get('start_date') or '' }}">
-        <label for="end_date">End Date:</label>
-        <input type="date" name="end_date" class="form-control w-25"
-            value="{{ request.args.get('end_date') or '' }}">
-        <button type="submit" class="btn btn-primary mt-2">Apply Filter</button>
-        <a href="/dashboard" class="btn btn-light border" style="margin-top: 7px;">Clear Filter</a>
-        <a href="/export?start_date={{ request.args.get('start_date') or '' }}&end_date={{ request.args.get('end_date') or '' }}&sentiment={{ request.args.get('sentiment') or '' }}" 
-            class="btn btn-secondary" style="margin-top: 7px;">Export Filtered Data to CSV</a>
-    </form>
-</div>
-
-<div class="mt-5">
-    <h2>Sentiment Counts</h2>
-    <ul class="list-group">
-        {% for sentiment, count in sentiment_counts.items() %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ sentiment }}
-            <span class="badge bg-primary rounded-pill">{{ count }}</span>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-
-<div class="mt-5">
-    <h2>Sentiment Distribution</h2>
-    <img src="data:image/png;base64,{{ chart_url }}" alt="Sentiment Chart" class="img-fluid">
-</div>
-
-<div class="mt-5">
-    <h2>Interactive Sentiment Trends Over Time</h2>
-    <div>{{ interactive_chart | safe }}</div>
-</div>
-
-<div class="mt-5">
-    <h2>Most Frequent Words</h2>
-    <h4>Positive Sentiments</h4>
-    <ul>
-        {% for word, count in positive_words %}
-        <li>{{ word }}: {{ count }}</li>
-        {% endfor %}
-    </ul>
-    <h4>Negative Sentiments</h4>
-    <ul>
-        {% for word, count in negative_words %}
-        <li>{{ word }}: {{ count }}</li>
-        {% endfor %}
-    </ul>
-    <h4>Neutral Sentiments</h4>
-    <ul>
-        {% for word, count in neutral_words %}
-        <li>{{ word }}: {{ count }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-<div class="mt-5">
-    <h2>Average Confidence Scores</h2>
-    <ul>
-        {% for sentiment, score in avg_confidence.items() %}
-        <li>{{ sentiment }}: {{ score | round(2) }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
-<div class="mt-5">
-    <h2>Word Clouds</h2>
-    <div class="row">
-        <div class="col-md-4">
-            <h4>Positive Sentiments</h4>
-            <img src="data:image/png;base64,{{ positive_wordcloud }}" alt="Positive Word Cloud" class="img-fluid">
-            <a href="/export/download_wordcloud?sentiment=POSITIVE" class="btn btn-primary">Download</a>
-        </div>
-        <div class="col-md-4">
-            <h4>Negative Sentiments</h4>
-            <img src="data:image/png;base64,{{ negative_wordcloud }}" alt="Negative Word Cloud" class="img-fluid">
-            <a href="/export/download_wordcloud?sentiment=NEGATIVE" class="btn btn-danger">Download</a>
-        </div>
-        <div class="col-md-4">
-            <h4>Neutral Sentiments</h4>
-            <img src="data:image/png;base64,{{ neutral_wordcloud }}" alt="Neutral Word Cloud" class="img-fluid">
-            <a href="/export/download_wordcloud?sentiment=NEUTRAL" class="btn btn-secondary">Download</a>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Sentiment Counts</h5>
+                <ul class="list-group">
+                    {% for sentiment, count in sentiment_counts.items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ sentiment }}
+                        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs mt-4" id="dashboardTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="wordcloud-tab" data-bs-toggle="tab" data-bs-target="#wordcloud" type="button" role="tab" aria-controls="wordcloud" aria-selected="true">Word Clouds</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="false">Details</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="linechart-tab" data-bs-toggle="tab" data-bs-target="#linechart" type="button" role="tab" aria-controls="linechart" aria-selected="false">Line Chart</button>
+    </li>
+</ul>
+
+<!-- Tabs Content -->
+<div class="tab-content mt-4" id="dashboardTabsContent">
+    <!-- Word Clouds Tab -->
+    <div class="tab-pane fade show active" id="wordcloud" role="tabpanel" aria-labelledby="wordcloud-tab">
+        <h2>Word Clouds</h2>
+        <div class="row">
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <h4>Positive Sentiments</h4>
+                <img src="data:image/png;base64,{{ positive_wordcloud }}" alt="Positive Word Cloud" class="img-fluid">
+                <a href="/export/download_wordcloud?sentiment=POSITIVE" class="btn btn-primary mt-2">Download</a>
+            </div>
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <h4>Negative Sentiments</h4>
+                <img src="data:image/png;base64,{{ negative_wordcloud }}" alt="Negative Word Cloud" class="img-fluid">
+                <a href="/export/download_wordcloud?sentiment=NEGATIVE" class="btn btn-danger mt-2">Download</a>
+            </div>
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <h4>Neutral Sentiments</h4>
+                <img src="data:image/png;base64,{{ neutral_wordcloud }}" alt="Neutral Word Cloud" class="img-fluid">
+                <a href="/export/download_wordcloud?sentiment=NEUTRAL" class="btn btn-secondary mt-2">Download</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Tab -->
+    <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+        <h2>Details</h2>
+        <h4>Most Frequent Words</h4>
+        <h5>Positive Sentiments</h5>
+        <ul>
+            {% for word, count in positive_words %}
+            <li>{{ word }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+        <h5>Negative Sentiments</h5>
+        <ul>
+            {% for word, count in negative_words %}
+            <li>{{ word }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+        <h5>Neutral Sentiments</h5>
+        <ul>
+            {% for word, count in neutral_words %}
+            <li>{{ word }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Line Chart Tab -->
+    <div class="tab-pane fade" id="linechart" role="tabpanel" aria-labelledby="linechart-tab">
+        <h2 class="mb-4 text-center">Interactive Sentiment Trends Over Time</h2>
+        <div class="d-flex justify-content-center">
+            <div class="chart-wrapper" style="max-width: 1200px; width: 100%; margin: 0 auto;">
+                {{ interactive_chart | safe }}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -26,7 +26,7 @@ class TextAnalyzer:
     @staticmethod
     def get_most_frequent_words(data, sentiment):
         # Filter data by sentiment
-        filtered = data[data['Sentiment'] == sentiment]['Input Text']
+        filtered = data[data['Sentiment'] == sentiment]['Input_Text']
         all_words = " ".join(filtered).split()
         
         # Remove stop words and punctuation
@@ -42,7 +42,7 @@ class TextAnalyzer:
     @staticmethod
     def generate_wordcloud(data, sentiment):
         # Filter text by sentiment
-        text = " ".join(data[data['Sentiment'] == sentiment]['Input Text'])
+        text = " ".join(data[data['Sentiment'] == sentiment]['Input_Text'])
         
         # Remove stop words
         cleaned_text = " ".join(

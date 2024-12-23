@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, make_response
 import os
-import pandas as pd
+import sqlite3
 from modules.utilities.text_analyzer import TextAnalyzer
 import base64
 
@@ -8,13 +8,19 @@ export_routes = Blueprint('export', __name__)
 
 @export_routes.route("/", methods=["GET"])
 def export_csv():
-    log_file = "logs/sentiment_logs.csv"
-    if not os.path.exists(log_file):
+    db_file_path = "instance/moodlens.db"
+
+    if not os.path.exists(db_file_path):
         return "No data available to export."
 
-    # Load data
-    data = pd.read_csv(log_file)
-    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+    # Connect to the SQLite database
+    conn = sqlite3.connect(db_file_path)
+    cursor = conn.cursor()
+
+    # Base query
+    query = "SELECT Timestamp, Input_Text, Sentiment, Confidence FROM sentiment_logs"
+    conditions = []
+    params = []
 
     # Apply filters
     start_date = request.args.get('start_date')
@@ -22,17 +28,42 @@ def export_csv():
     sentiment = request.args.get('sentiment')
 
     if start_date:
-        data = data[data['Timestamp'] >= start_date]
+        conditions.append("Timestamp >= ?")
+        params.append(start_date)
     if end_date:
-        data = data[data['Timestamp'] <= end_date]
+        conditions.append("Timestamp <= ?")
+        params.append(end_date)
     if sentiment:
-        data = data[data['Sentiment'].str.upper() == sentiment.upper()]
+        conditions.append("UPPER(Sentiment) = ?")
+        params.append(sentiment.upper())
 
-    if data.empty:
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    # Execute the query
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
         return "No data matches the filters."
 
-    # Convert to CSV
-    csv_data = data.to_csv(index=False)
+    # Convert rows to CSV format
+    import csv
+    from io import StringIO
+
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # Write header
+    writer.writerow(["Timestamp", "Input_Text", "Sentiment", "Confidence"])
+
+    # Write rows
+    writer.writerows(rows)
+
+    csv_data = output.getvalue()
+    output.close()
+
     return Response(
         csv_data,
         mimetype="text/csv",
@@ -46,15 +77,29 @@ def download_wordcloud():
     if not sentiment:
         return "Sentiment parameter is required.", 400
 
-    # Load the dataset (ensure path is correct)
-    log_file = "logs/sentiment_logs.csv"
-    if not os.path.exists(log_file):
+    db_file_path = "instance/moodlens.db"
+
+    if not os.path.exists(db_file_path):
         return "No data available to generate the WordCloud."
 
-    data = pd.read_csv(log_file)
+    # Connect to the SQLite database
+    conn = sqlite3.connect(db_file_path)
+    cursor = conn.cursor()
+
+    # Fetch data for the specified sentiment
+    query = "SELECT Input_Text FROM sentiment_logs WHERE UPPER(Sentiment) = ?"
+    cursor.execute(query, (sentiment.upper(),))
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return "No data available for the specified sentiment."
+
+    # Extract input text
+    text_data = [row[0] for row in rows]
 
     # Generate the WordCloud image
-    wordcloud_img = TextAnalyzer.generate_wordcloud(data, sentiment)
+    wordcloud_img = TextAnalyzer.generate_wordcloud(text_data, sentiment)
 
     # Decode the Base64 image
     img_bytes = base64.b64decode(wordcloud_img)

@@ -48,20 +48,33 @@ def generate_chart(data):
 def generate_interactive_line_chart(data):
     """
     Generates an interactive line chart of sentiment trends over time.
-    
+
     Args:
         data (pd.DataFrame): The dataset containing sentiment data.
-    
+
     Returns:
         str: HTML representation of the interactive Plotly chart.
     """
     data['Timestamp'] = pd.to_datetime(data['Timestamp'])
     grouped = data.groupby([data['Timestamp'].dt.date, 'Sentiment']).size().reset_index(name="Count")
 
-    fig = px.line(grouped, x='Timestamp', y='Count', color='Sentiment',
-                  title="Sentiment Trends Over Time",
-                  labels={'Timestamp': 'Date', 'Count': 'Count'},
-                  template="plotly_white")
+    fig = px.line(
+        grouped,
+        x='Timestamp',
+        y='Count',
+        color='Sentiment',
+        title="Sentiment Trends Over Time",
+        labels={'Timestamp': 'Date', 'Count': 'Count'},
+        template="plotly_white",
+    )
+    
+    # Set responsive layout
+    fig.update_layout(
+        autosize=True,
+        height=500,  # Maintain fixed height for consistency
+        width=1200,  # Allow dynamic width by container
+        margin=dict(l=20, r=20, t=50, b=20),  # Margins around the chart
+    )
     fig.update_xaxes(title="Date", tickangle=45)
     fig.update_yaxes(title="Count")
     return fig.to_html(full_html=False)
