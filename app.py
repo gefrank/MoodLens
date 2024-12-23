@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager
+from modules.models import User  # Import the User model from models.py
 from modules.utilities.database import db, init_db
 from modules.routes.auth_routes import auth_routes
 from modules.routes.dashboard_routes import dashboard_routes
@@ -34,10 +35,9 @@ app.register_blueprint(export_routes, url_prefix="/export")
 with app.app_context():
     db.create_all()
 
-# User loader for Flask-Login
-from modules.services.auth_service import User  # Ensure the User model is imported
 @login_manager.user_loader
 def load_user(user_id):
+    """Load a user by their ID for Flask-Login."""
     return User.query.get(int(user_id))
 
 if __name__ == "__main__":
