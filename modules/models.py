@@ -1,6 +1,7 @@
 from .utilities.database import db
 from flask_login import UserMixin
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 
 bcrypt = Bcrypt()
 
@@ -44,3 +45,22 @@ class UserRole(db.Model):
 
     def __repr__(self):
         return f"<UserRole user_id={self.user_id} role_id={self.role_id}>"
+    
+
+class SentimentLog(db.Model):
+    __tablename__ = "sentiment_logs"
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Primary key
+    Timestamp = db.Column(db.Text, nullable=False)
+    Input_Text = db.Column(db.Text, nullable=False)
+    Sentiment = db.Column(db.Text, nullable=False)
+    Confidence = db.Column(db.Float, nullable=False)
+
+    def __init__(self, Input_Text, Sentiment, Confidence, Timestamp=None):
+        self.Input_Text = Input_Text
+        self.Sentiment = Sentiment
+        self.Confidence = Confidence
+        self.Timestamp = Timestamp or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def __repr__(self):
+        return f"<SentimentLog {self.Input_Text[:20]}... - {self.Sentiment}>"

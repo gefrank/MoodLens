@@ -1,51 +1,30 @@
-import sqlite3
-import os
 from datetime import datetime
+from modules.models import SentimentLog
+from modules.utilities.database import db
 
-db_file_path = "instance/moodlens.db"
-
-def initialize_database():
-    """Ensures the database and sentiment_logs table are initialized."""
-    if not os.path.exists(db_file_path):
-        os.makedirs(os.path.dirname(db_file_path), exist_ok=True)
-
-    # Connect to the database and create the table if it doesn't exist
-    conn = sqlite3.connect(db_file_path)
-    cursor = conn.cursor()
-
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS sentiment_logs (
-        Timestamp TEXT NOT NULL,
-        Input_Text TEXT NOT NULL,
-        Sentiment TEXT NOT NULL,
-        Confidence REAL NOT NULL
-    );
+def log_sentiment(Input_Text, Sentiment, Confidence):
     """
-    cursor.execute(create_table_query)
-    conn.commit()
-    conn.close()
+    Logs sentiment analysis results to the database using SQLAlchemy.
 
-def log_sentiment(text, label, score):
-    """Logs sentiment analysis results to the database."""
-    # Initialize the database if necessary
-    initialize_database()
-
-    # Connect to the database
-    conn = sqlite3.connect(db_file_path)
-    cursor = conn.cursor()
-
-    # Insert the new sentiment log
-    insert_query = """
-    INSERT INTO sentiment_logs (Timestamp, Input_Text, Sentiment, Confidence)
-    VALUES (?, ?, ?, ?);
+    Args:
+        Input_Text (str): The input text analyzed.
+        Sentiment (str): The sentiment label (e.g., Positive, Negative, Neutral).
+        Confidence (float): The confidence score of the analysis.
     """
-    formatted_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute(insert_query, (formatted_time, text, label, score))
+    # Create a new sentiment log entry
+    log = SentimentLog(
+        Input_Text=Input_Text,
+        Sentiment=Sentiment,
+        Confidence=Confidence,
+        Timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Current timestamp
+    )
+    db.session.add(log)
+    db.session.commit()
 
-    # Commit and close the connection
-    conn.commit()
-    conn.close()
-
-# Example usage
+# Example usage (Run this inside the app context)
 if __name__ == "__main__":
-    log_sentiment("This is a test", "POSITIVE", 0.95)
+    from app import app
+
+    with app.app_context():
+        log_sentiment("This is a test", "POSITIVE", 0.95)
+        print("Sentiment log added!")
