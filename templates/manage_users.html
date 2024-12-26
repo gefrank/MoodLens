@@ -3,31 +3,63 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <h1 class="text-center">Manage Users</h1>
-        <form method="post">
-            {{ form.hidden_tag() }}
-            <div class="mb-3">
-                {{ form.user_id.label }} {{ form.user_id }}
-            </div>
-            <div class="mb-3">
-                {{ form.role_id.label }} {{ form.role_id }}
-            </div>
-            <button type="submit" class="btn btn-primary w-100">{{ form.submit.label }}</button>
-        </form>
-        <hr>
-        <h2 class="mt-4">All Users</h2>
-        <ul class="list-group">
+<h1 class="text-center">Manage Users</h1>
+
+<form method="POST" class="mb-4">
+    <div class="form-group mb-2">
+        <label for="user">User</label>
+        <select name="user_id" id="user" class="form-select" required>
             {% for user in users %}
-                <li class="list-group-item">
-                    {{ user.username }} - Roles: 
-                    {% for role in user.roles %}
-                        <span class="badge bg-secondary">{{ role.name }}</span>
-                    {% endfor %}
-                </li>
+            <option value="{{ user.id }}">{{ user.username }}</option>
             {% endfor %}
-        </ul>
+        </select>
     </div>
-</div>
+    <div class="form-group mb-2">
+        <label for="role">Role</label>
+        <select name="role_id" id="role" class="form-select" required>
+            {% for role in roles %}
+            <option value="{{ role.id }}">{{ role.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" name="action" value="assign" class="btn btn-primary">Assign Role</button>
+</form>
+
+<hr>
+
+<h2>All Users</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td>
+                {% for role in user.roles %}
+                <span class="badge bg-secondary">{{ role.name }}</span>
+                {% endfor %}
+            </td>
+            <td>
+                {% for role in user.roles %}
+                <form method="POST" class="d-inline">
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <input type="hidden" name="role_id" value="{{ role.id }}">
+                    <button type="submit" name="action" value="remove" class="btn btn-sm btn-warning">Remove {{ role.name }}</button>
+                </form>
+                {% endfor %}
+                <form method="POST" class="d-inline">
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger">Delete User</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

@@ -13,13 +13,16 @@
                 <form method="post">
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
-                        {{ form.username.label }} {{ form.username }}
+                        <label for="username" class="form-label">{{ form.username.label.text }}</label>
+                        {{ form.username(class="form-control", id="username") }}
                     </div>
                     <div class="mb-3">
-                        {{ form.password.label }} {{ form.password }}
+                        <label for="password" class="form-label">{{ form.password.label.text }}</label>
+                        {{ form.password(class="form-control", id="password") }}
                     </div>
                     <div class="mb-3">
-                        {{ form.confirm_password.label }} {{ form.confirm_password }}
+                        <label for="confirm_password" class="form-label">{{ form.confirm_password.label.text }}</label>
+                        {{ form.confirm_password(class="form-control", id="confirm_password") }}
                     </div>
                     <button type="submit" class="btn btn-primary w-100">{{ form.submit.label }}</button>
                 </form>
