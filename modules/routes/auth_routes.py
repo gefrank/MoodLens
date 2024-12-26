@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from modules.services.auth_service import get_user_by_username, create_user
 from modules.models import Role
@@ -17,7 +17,13 @@ def login():
         if user and user.verify_password(password):
             login_user(user)
             flash("Login successful!", "success")
-            return redirect(url_for("dashboard.dashboard"))
+
+            user_role = session.get('user_role')
+            if user_role in ['Admin', 'UserAdmin']:
+                return redirect(url_for("dashboard.dashboard"))              
+            else:
+                return redirect(url_for('main.index'))
+            
         else:
             flash("Invalid username or password.", "danger")
             return redirect(url_for("auth.login"))
