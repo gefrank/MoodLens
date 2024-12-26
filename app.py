@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow logging
 from dotenv import load_dotenv
 from flask import Flask
 from flask_login import LoginManager

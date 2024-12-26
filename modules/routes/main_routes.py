@@ -1,7 +1,8 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, jsonify
 from modules.utilities.logger import log_sentiment  # Import from logger.py
 from modules.services.sentiment_service import analyze_sentiment
 from modules.models import AppConfig
+from modules.services.emotion_service import detect_emotion
 
 main_routes = Blueprint('main', __name__)
 
@@ -26,3 +27,13 @@ def index():
             # Log the sentiment analysis result
             log_sentiment(Input_Text=text, Sentiment=label, Confidence=score, current_model=current_model)
     return render_template("index.html", result=result, current_model=current_model)
+
+
+@main_routes.route("/webcam", methods=["GET", "POST"])
+def webcam():
+    if request.method == "POST":
+        image = request.files["image"]
+        backend = request.form.get("backend", "retinaface")  # Get selected backend, default to retinaface
+        result = detect_emotion(image, backend)
+        return jsonify(result)
+    return render_template("webcam.html")

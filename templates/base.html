@@ -14,14 +14,14 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!-- TODO Remove Testing -->
-            <!-- <p>Is authenticated: {{ current_user.is_authenticated }}</p>
-            <p>Roles: {{ current_user.roles if current_user.is_authenticated else 'None' }}</p>             -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/webcam">Webcam Mood Analysis</a>
+                    </li>                    
                     {% if current_user.is_authenticated and (current_user.has_role("Admin") or current_user.has_role("UserAdmin")) %}
                     <li class="nav-item">
                         <a class="nav-link" href="/dashboard">Dashboard</a>
