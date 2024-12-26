@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Toggle Sentiment Analysis{% endblock %}
+
+{% block content %}
+<h1 class="text-center text-primary my-4">Toggle Sentiment Analysis</h1>
+
+<form method="POST" action="{{ url_for('admin.toggle_sentiment') }}">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="sentiment_toggle" id="distilbert" value="distilbert" {% if current_value == 'distilbert' %}checked{% endif %}>
+        <label class="form-check-label" for="distilbert">
+            Use DistilBERT
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="sentiment_toggle" id="openai" value="openai" {% if current_value == 'openai' %}checked{% endif %}>
+        <label class="form-check-label" for="openai">
+            Use OpenAI
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+{% endblock %}

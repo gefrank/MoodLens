@@ -3,9 +3,10 @@
 **MoodLens** is a Flask-based sentiment analysis application using Hugging Face's Transformers library and Matplotlib for data visualization.
 
 ## Features:
-- Analyze text sentiment (Positive, Negative, Neutral).
-- View sentiment trends through a dynamic dashboard.
-- Visualize data with bar and pie charts.
+   Sentiment Analysis: Analyze text sentiment and classify it as Positive, Negative, or Neutral.
+   Dynamic Dashboard: View sentiment trends through an interactive and dynamic dashboard.
+   Data Visualization: Visualize sentiment data using bar and pie charts for better insights.
+   AI Model Switching: Toggle between different AI models for sentiment analysis to compare performance and accuracy.
 
 ## Installation:
 1. Clone the repository:

@@ -2,7 +2,7 @@ from datetime import datetime
 from modules.models import SentimentLog
 from modules.utilities.database import db
 
-def log_sentiment(Input_Text, Sentiment, Confidence):
+def log_sentiment(Input_Text, Sentiment, Confidence, current_model=None):
     """
     Logs sentiment analysis results to the database using SQLAlchemy.
 
@@ -16,6 +16,7 @@ def log_sentiment(Input_Text, Sentiment, Confidence):
         Input_Text=Input_Text,
         Sentiment=Sentiment,
         Confidence=Confidence,
+        current_model=current_model,
         Timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Current timestamp
     )
     db.session.add(log)

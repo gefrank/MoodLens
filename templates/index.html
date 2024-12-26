@@ -4,6 +4,7 @@
 
 {% block content %}
 <h1 class="text-center">MoodLens: Sentiment Analyzer</h1>
+<h2 class="text-center text-secondary mt-2">Currently Selected AI Model: {{ current_model }}</h2>
 <form method="post" onsubmit="return validateForm()" class="mt-4">
     <div class="mb-3">
         <label for="text" class="form-label">Enter Text:</label>

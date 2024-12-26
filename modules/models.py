@@ -68,12 +68,22 @@ class SentimentLog(db.Model):
     Input_Text = db.Column(db.Text, nullable=False)
     Sentiment = db.Column(db.Text, nullable=False)
     Confidence = db.Column(db.Float, nullable=False)
+    current_model = db.Column(db.String(255), nullable=True)  
 
-    def __init__(self, Input_Text, Sentiment, Confidence, Timestamp=None):
+    def __init__(self, Input_Text, Sentiment, Confidence, current_model, Timestamp=None):
         self.Input_Text = Input_Text
-        self.Sentiment = Sentiment
+        self.Sentiment = Sentiment.upper() 
         self.Confidence = Confidence
+        self.current_model = current_model  # Set current model
         self.Timestamp = Timestamp or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def __repr__(self):
         return f"<SentimentLog {self.Input_Text[:20]}... - {self.Sentiment}>"
+    
+class AppConfig(db.Model):
+    __tablename__ = 'app_config'
+    key = db.Column(db.String(50), primary_key=True)
+    value = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return f"<AppConfig key={self.key} value={self.value}>"    
