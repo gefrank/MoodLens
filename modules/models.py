@@ -5,11 +5,37 @@ from datetime import datetime
 
 bcrypt = Bcrypt()
 
+# Association table for many-to-many relationship
+class UserRole(db.Model):
+    __tablename__ = 'user_roles'
+
+    # Composite primary key using user_id and role_id
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
+
+    def __repr__(self):
+        return f"<UserRole user_id={self.user_id} role_id={self.role_id}>"
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(150), nullable=False)
+
+    # Define a many-to-many relationship with Role
+    roles = db.relationship(
+        'Role',
+        secondary='user_roles',  # Reference the user_roles table
+        backref=db.backref('users', lazy='dynamic')  # Allows querying users from a role
+    )
+
+
+    def has_role(self, role_name):
+        if not self.roles:  # Handle None or empty list
+            return False
+        return any(role.name == role_name for role in self.roles)
+    
 
     @staticmethod
     def hash_password(password):
@@ -22,7 +48,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User {self.username}>"
-    
+
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -33,19 +59,6 @@ class Role(db.Model):
     def __repr__(self):
         return f"<Role {self.name}>"
 
-
-class UserRole(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)  # Replace with a foreign key if you have a User model
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
-
-    # Relationship to Role
-    role = db.relationship('Role', backref=db.backref('user_roles', lazy=True))
-
-    def __repr__(self):
-        return f"<UserRole user_id={self.user_id} role_id={self.role_id}>"
-    
 
 class SentimentLog(db.Model):
     __tablename__ = "sentiment_logs"

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1 class="text-center">Manage Users</h1>
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.user_id.label }} {{ form.user_id }}
+            </div>
+            <div class="mb-3">
+                {{ form.role_id.label }} {{ form.role_id }}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">{{ form.submit.label }}</button>
+        </form>
+        <hr>
+        <h2 class="mt-4">All Users</h2>
+        <ul class="list-group">
+            {% for user in users %}
+                <li class="list-group-item">
+                    {{ user.username }} - Roles: 
+                    {% for role in user.roles %}
+                        <span class="badge bg-secondary">{{ role.name }}</span>
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
