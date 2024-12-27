@@ -1,0 +1,124 @@
+/* Mood Analysis Layout */
+.mood-analysis-container {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.mood-image-container {
+    flex: 1;
+    max-width: 50%;
+}
+
+.mood-results-container {
+    flex: 1;
+    max-width: 50%;
+}
+
+.captured-image {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Mood Results Card */
+.mood-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.mood-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.mood-result {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+/* Progress Bars */
+.mood-progress {
+    height: 8px;
+    background-color: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mood-progress .progress-bar {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    transition: width 0.5s ease-out;
+}
+
+/* Recent Results */
+.recent-results {
+    margin-top: 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.recent-results .card-header {
+    background: linear-gradient(to right, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 1rem 1.5rem;
+}
+
+.recent-results .card-header h5 {
+    margin: 0;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.recent-results .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.recent-results .list-group-item:hover {
+    background-color: #f8fafc;
+}
+
+.recent-results .mood-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recent-results .mood-label {
+    font-weight: 600;
+    color: #6366f1;
+}
+
+.recent-results .mood-details {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.recent-results .mood-time {
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mood-analysis-container {
+        flex-direction: column;
+    }
+    
+    .mood-image-container,
+    .mood-results-container {
+        max-width: 100%;
+    }
+}

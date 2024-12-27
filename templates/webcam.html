@@ -69,13 +69,34 @@
     </div>
 
     <!-- Results Section -->
-    <div class="d-flex align-items-start justify-content-center gap-3">
-        <img id="capturedImage" class="img-fluid rounded shadow-sm" style="max-width: 40%; display: none;" alt="Captured Image">
-        <div id="moodResultOverlay" class="text-center py-3 px-4 rounded shadow-sm" 
-             style="background: rgba(0,0,0,0.9); color: white; display: none; min-width: 300px;">
-            <div id="moodResultText" class="fs-4 mb-2"></div>
-            <div id="confidenceScore" class="small mb-3"></div>
-            <div id="allEmotions" class="small" style="font-size: 0.8rem;"></div>
+    <div class="mood-analysis-container">
+        <!-- Left Column - Captured Image -->
+        <div class="mood-image-container">
+            <img id="capturedImage" class="captured-image" style="display: none;" alt="Captured Image">
+        </div>
+
+        <!-- Right Column - Results Card -->
+        <div class="mood-results-container">
+            <div id="moodResultOverlay" class="mood-card" style="display: none;">
+                <div class="card-body">
+                    <h3 class="mood-title text-center">Detected Mood</h3>
+                    <div id="moodResultText" class="mood-result text-center"></div>
+                    <div id="confidenceScore" class="text-center text-muted mb-4"></div>
+                    
+                    <h4 class="fs-5 mb-3">Emotion Distribution</h4>
+                    <div id="allEmotions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History section -->
+    <div class="recent-results" style="display: none;" id="historyCard">
+        <div class="card-header">
+            <h5>Recent Results</h5>
+        </div>
+        <div id="moodHistory" class="list-group list-group-flush">
+            <!-- History items will be added here -->
         </div>
     </div>
 
@@ -168,23 +189,46 @@
 
     // Add to history
     function addToHistory(mood, backend) {
-        const timestamp = new Date().toLocaleTimeString();
-        const historyItem = document.createElement('a');
-        historyItem.className = 'list-group-item list-group-item-action';
-        historyItem.innerHTML = `
-            <div class="d-flex w-100 justify-content-between">
-                <h6 class="mb-1">${mood}</h6>
-                <small>${timestamp}</small>
+    const timestamp = new Date().toLocaleTimeString();
+    const historyItem = document.createElement('div');
+    historyItem.className = 'list-group-item';
+    historyItem.innerHTML = `
+        <div class="mood-history-item">
+            <div>
+                <span class="mood-label">${mood}</span>
+                <div class="mood-details">Using ${backend}</div>
             </div>
-            <small class="text-muted">Using ${backend}</small>
-        `;
-        moodHistory.prepend(historyItem);
-        historyCard.style.display = 'block';
-        
-        // Keep only last 5 entries
-        while (moodHistory.children.length > 5) {
-            moodHistory.removeChild(moodHistory.lastChild);
-        }
+            <span class="mood-time">${timestamp}</span>
+        </div>
+    `;
+    moodHistory.prepend(historyItem);
+    historyCard.style.display = 'block';
+    
+    // Keep only last 5 entries
+    while (moodHistory.children.length > 5) {
+        moodHistory.removeChild(moodHistory.lastChild);
+    }
+}
+
+    function updateEmotionBars(emotions) {
+        const allEmotionsDiv = document.getElementById('allEmotions');
+        allEmotionsDiv.innerHTML = Object.entries(emotions)
+            .map(([emotion, score]) => `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-capitalize" style="min-width: 80px;">${emotion}</span>
+                        <div class="flex-grow-1 mx-3">
+                            <div class="progress mood-progress" style="height: 8px; background-color: #f0f0f0;">
+                                <div class="progress-bar" role="progressbar" 
+                                    style="width: ${score}%; transition: width 0.5s ease-out;" 
+                                    aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-end" style="min-width: 50px;">${score.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `).join('');
     }
 
     // Capture the mood and image
@@ -226,42 +270,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.mood.includes("Error")) {
-                    errorMessage.textContent = data.mood;
-                    moodResult.textContent = '';
+                    const errorDiv = document.getElementById('errorMessage');
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerHTML = `
+                        <div class="flex items-center space-x-2 text-red-700 dark:text-red-400">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <span class="text-sm font-medium">${data.mood}</span>
+                        </div>
+                    `;
                     document.getElementById('moodResultOverlay').style.display = 'none';
                 } else {
-                    // Display main emotion and backend
-                    document.getElementById('moodResultText').textContent = 
-                        `Your mood is: ${data.mood} (using ${selectedBackend})`;
-                    
-                    // Display confidence score
-                    document.getElementById('confidenceScore').textContent = 
-                        `Confidence: ${data.confidence}%`;
-                    
-                    // Display all emotions if available
-                    const allEmotionsElem = document.getElementById('allEmotions');
-                    if (data.all_emotions && Object.keys(data.all_emotions).length > 0) {
-                        const emotionBars = Object.entries(data.all_emotions)
-                            .map(([emotion, score]) => {
-                                const barWidth = score;
-                                return `
-                                    <div class="d-flex align-items-center justify-content-between" style="margin: 2px 0;">
-                                        <span style="width: 70px; text-align: right; margin-right: 5px;">${emotion}:</span>
-                                        <div class="progress" style="height: 4px; flex-grow: 1; margin: 0 5px; background-color: rgba(255,255,255,0.2);">
-                                            <div class="progress-bar bg-info" style="width: ${barWidth}%"></div>
-                                        </div>
-                                        <span style="width: 40px; text-align: left;">${score}%</span>
-                                    </div>`;
-                            })
-                            .join('');
-                        allEmotionsElem.innerHTML = emotionBars;
-                    } else {
-                        allEmotionsElem.innerHTML = '';
+                    document.getElementById('moodResultText').textContent = data.mood;
+                    document.getElementById('confidenceScore').textContent = `Confidence: ${data.confidence}%`;
+                    if (data.all_emotions) {
+                        updateEmotionBars(data.all_emotions);
                     }
-                    
                     document.getElementById('moodResultOverlay').style.display = 'block';
-                    moodResult.textContent = '';
-                    errorMessage.textContent = '';
+                    document.getElementById('errorMessage').style.display = 'none';
                     addToHistory(data.mood, selectedBackend);
                 }
             })
