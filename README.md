@@ -80,17 +80,26 @@
 
 ## Screenshots
 
-![MoodLens Dashboard](/screenshots/dashboard.png)
-*Dashboard showing sentiment analysis trends and word clouds*
+### Dashboard Views
+![Dashboard Word Clouds](screenshots/MoodLens_Dashboard_WordClouds.jpg)
+*Word cloud visualization of positive, negative, and neutral sentiments*
 
-![Webcam Emotion Detection](/screenshots/webcam.png)
-*Real-time emotion detection with confidence scores*
+![Dashboard Overview](screenshots/MoodLens_Dashboard_LineChart.jpg)
+*Main dashboard showing sentiment analysis statistics and trends over time*
 
-![User Management](/screenshots/users.png)
-*Admin interface for user role management*
+### Analysis Features
+![Sentiment Settings](screenshots/SentimentAnalyzer_AIToggle.jpg)
+*Admin controls for switching between AI models (DistilBERT/OpenAI)*
 
-![Sentiment Analysis](/screenshots/sentiment.png)
-*Text sentiment analysis with model selection*
+![Sentiment Analysis - DistilBERT](screenshots/SentimentAnalyzer_Distilbert.jpg)
+*Text sentiment analysis using DistilBERT model*
+
+![Sentiment Analysis - OpenAI](screenshots/SentimentAnalyzer_OpenAI.jpg)
+*Text sentiment analysis using OpenAI model*
+
+### User Management
+![User Management](screenshots/Manage_Users_Roles.jpg)
+*Admin interface for managing user roles and permissions*
 
 ## Learning Outcomes
 

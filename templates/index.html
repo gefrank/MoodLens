@@ -1,37 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Home - MoodLens{% endblock %}
+{% block title %}MoodLens: Sentiment Analyzer{% endblock %}
 
 {% block content %}
-<h1 class="text-center">MoodLens: Sentiment Analyzer</h1>
-<h2 class="text-center text-secondary mt-2">Currently Selected AI Model: {{ current_model }}</h2>
-<form method="post" onsubmit="return validateForm()" class="mt-4">
-    <div class="mb-3">
-        <label for="text" class="form-label">Enter Text:</label>
-        <textarea name="text" id="text" class="form-control" rows="5" placeholder="Type your text here..."></textarea>
+<div class="container">
+    <h1 class="text-center mb-4">MoodLens: Sentiment Analyzer</h1>
+    <h2 class="text-center text-muted mb-4">Currently Selected AI Model: {{ current_model }}</h2>
+
+    <form method="POST" id="sentimentForm">
+        <div class="form-group mb-3">
+            <label for="text">Enter Text:</label>
+            <textarea class="form-control" id="text" name="text" rows="5" required>{{ request.form.get('text', '') }}</textarea>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Analyze Sentiment</button>
+            <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+        </div>
+    </form>
+
+    {% if result %}
+    <div class="alert alert-info mt-4" role="alert">
+        {{ result }}
     </div>
-    <button type="submit" id="analyzeButton" class="btn btn-primary w-100" disabled>Analyze Sentiment</button>
-</form>
-{% if result %}
-<div class="alert alert-info mt-4" role="alert">
-    {{ result }}
+    {% endif %}
 </div>
-{% endif %}
 
 <script>
-    const textarea = document.getElementById('text');
-    const analyzeButton = document.getElementById('analyzeButton');
-
-    textarea.addEventListener('input', function () {
-        analyzeButton.disabled = textarea.value.trim() === "";
-    });
-
-    function validateForm() {
-        if (textarea.value.trim() === "") {
-            alert("Please enter some text for analysis.");
-            return false;
-        }
-        return true;
+document.getElementById('clearBtn').addEventListener('click', function() {
+    document.getElementById('text').value = '';
+    // Optionally, also clear the result if you want
+    const resultDiv = document.querySelector('.alert-info');
+    if (resultDiv) {
+        resultDiv.style.display = 'none';
     }
+});
 </script>
 {% endblock %}
