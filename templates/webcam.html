@@ -5,27 +5,12 @@
 {% block content %}
 <h1 class="text-center my-4">Webcam Mood Analysis</h1>
 <div class="text-center">
-    <div class="mb-3">
-        <div class="btn-group" role="group" aria-label="Face Detection Backend">
-            <input type="radio" class="btn-check" name="backend" id="retinaface" value="retinaface" checked>
-            <label class="btn btn-outline-primary" for="retinaface">RetinaFace</label>
-
-            <input type="radio" class="btn-check" name="backend" id="mtcnn" value="mtcnn">
-            <label class="btn btn-outline-primary" for="mtcnn">MTCNN</label>
-
-            <input type="radio" class="btn-check" name="backend" id="opencv" value="opencv">
-            <label class="btn btn-outline-primary" for="opencv">OpenCV</label>
-
-            <input type="radio" class="btn-check" name="backend" id="ssd" value="ssd">
-            <label class="btn btn-outline-primary" for="ssd">SSD</label>
-        </div>
-    </div>
-    
     <!-- Camera status indicator -->
     <div id="cameraStatus" class="alert alert-info mb-3" style="display: none;">
         Initializing camera...
     </div>
 
+    <!-- Video Feed -->
     <video id="video" autoplay class="mb-3 rounded shadow-sm"></video>
     <canvas id="canvas" style="display:none;"></canvas>
     
@@ -34,6 +19,56 @@
          style="display:none; z-index: 1000; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
     </div>
 
+    <!-- Detection Backend Selection -->
+    <div class="mb-3">
+        <div class="btn-group" role="group" aria-label="Face Detection Backend">
+            <input type="radio" class="btn-check" name="backend" id="retinaface" value="retinaface" checked>
+            <label class="btn btn-outline-primary" for="retinaface" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="top" 
+                   title="State-of-the-art face detection with highest accuracy. Best for challenging conditions like different angles and lighting. Slightly slower but most accurate.">
+                RetinaFace
+            </label>
+
+            <input type="radio" class="btn-check" name="backend" id="mtcnn" value="mtcnn">
+            <label class="btn btn-outline-primary" for="mtcnn"
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="top" 
+                   title="Multi-task Cascaded Neural Network. Good balance of speed and accuracy. Great for detecting multiple faces and facial landmarks.">
+                MTCNN
+            </label>
+
+            <input type="radio" class="btn-check" name="backend" id="opencv" value="opencv">
+            <label class="btn btn-outline-primary" for="opencv"
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="top" 
+                   title="Fast and lightweight detection. Best for real-time processing and simple scenarios. Works best with front-facing, well-lit faces.">
+                OpenCV
+            </label>
+
+            <input type="radio" class="btn-check" name="backend" id="ssd" value="ssd">
+            <label class="btn btn-outline-primary" for="ssd"
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="top" 
+                   title="Single Shot Detector. Fast performance and good for real-time use. Balanced approach between speed and accuracy.">
+                SSD
+            </label>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mb-4">
+        <button id="capture" class="btn btn-primary">
+            <span id="captureText">Capture Mood</span>
+            <span id="loadingSpinner" class="spinner-border spinner-border-sm" style="display: none;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </span>
+        </button>
+        <button id="clear" class="btn btn-secondary" style="display: none;">Clear</button>
+        <button id="timer" class="btn btn-info ms-2">Use 3s Timer</button>
+    </div>
+
+    <!-- Results Section -->
     <div class="d-flex align-items-start justify-content-center gap-3">
         <img id="capturedImage" class="img-fluid rounded shadow-sm" style="max-width: 40%; display: none;" alt="Captured Image">
         <div id="moodResultOverlay" class="text-center py-3 px-4 rounded shadow-sm" 
@@ -42,17 +77,6 @@
             <div id="confidenceScore" class="small mb-3"></div>
             <div id="allEmotions" class="small" style="font-size: 0.8rem;"></div>
         </div>
-    </div>
-    
-    <div class="mb-3">
-        <button id="capture" class="btn btn-primary mb-2">
-            <span id="captureText">Capture Mood</span>
-            <span id="loadingSpinner" class="spinner-border spinner-border-sm" style="display: none;" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </span>
-        </button>
-        <button id="clear" class="btn btn-secondary mb-2" style="display: none;">Clear</button>
-        <button id="timer" class="btn btn-info mb-2 ms-2">Use 3s Timer</button>
     </div>
 
     <!-- History section -->
@@ -70,6 +94,7 @@
     <p id="moodResult" class="mt-3 text-center fs-4 text-primary"></p>
     <p id="errorMessage" class="mt-3 text-center fs-4 text-danger"></p>
 </div>
+
 
 <script>
     const video = document.getElementById('video');
@@ -270,5 +295,14 @@
             stream.getTracks().forEach(track => track.stop());
         }
     });
+
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });    
+
 </script>
 {% endblock %}
