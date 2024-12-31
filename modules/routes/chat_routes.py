@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from modules.services.emotional_chatbot import EmotionalChatbot
-from modules.models import AppConfig
+from modules.models import AppConfig, ChatSession, ChatMessage
+from modules.utilities.database import db
 
 chat_routes = Blueprint('chat', __name__)
 
@@ -58,3 +59,27 @@ def get_history():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@chat_routes.route("/clear", methods=["POST"])
+@login_required
+def clear_history():
+    try:
+        # Get the user's current session
+        session = ChatSession.query.filter_by(
+            user_id=current_user.id
+        ).order_by(ChatSession.last_interaction.desc()).first()
+        
+        if session:
+            # Delete all messages for this session
+            ChatMessage.query.filter_by(session_id=session.id).delete()
+            
+            # Delete the session itself
+            db.session.delete(session)
+            
+            db.session.commit()
+            
+            return jsonify({"status": "success"})
+    except Exception as e:
+        print(f"Error clearing chat history: {str(e)}")
+        return jsonify({"error": str(e)}), 500    
