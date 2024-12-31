@@ -22,7 +22,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/webcam">Webcam Mood Analysis</a>
-                    </li>                    
+                    </li>              
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Emotional Chat</a>
+                    </li>
+                    {% endif %}                          
                     {% if current_user.is_authenticated and (current_user.has_role("Admin") or current_user.has_role("UserAdmin")) %}
                     <li class="nav-item">
                         <a class="nav-link" href="/dashboard">Dashboard</a>

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}MoodLens Chat{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mb-4">Emotional Chat Assistant</h1>
+    <h2 class="text-center text-muted mb-4">Currently Selected AI Model: {{ current_model }}</h2>
+    
+    <!-- Chat Window -->
+    <div class="card">
+        <div class="card-body">
+            <!-- Chat Messages Area -->
+            <div id="chatMessages" class="mb-3" style="height: 400px; overflow-y: auto;">
+                <div class="text-center text-muted mb-3">
+                    Start a conversation with the emotional chat assistant!
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <form id="chatForm" class="mt-3">
+                <div class="input-group">
+                    <input type="text" id="messageInput" class="form-control" 
+                           placeholder="Type your message..." required>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Message Templates -->
+<template id="userMessageTemplate">
+    <div class="d-flex justify-content-end mb-3">
+        <div class="message user-message">
+            <div class="message-content bg-primary text-white rounded p-2"></div>
+            <div class="message-metadata text-muted small mt-1"></div>
+        </div>
+    </div>
+</template>
+
+<template id="botMessageTemplate">
+    <div class="d-flex justify-content-start mb-3">
+        <div class="message bot-message">
+            <div class="message-content bg-light rounded p-2"></div>
+            <div class="message-metadata text-muted small mt-1"></div>
+        </div>
+    </div>
+</template>
+
+<style>
+.user-message, .bot-message {
+    max-width: 75%;
+}
+.message-content {
+    word-wrap: break-word;
+}
+.positive-sentiment {
+    border-left: 3px solid #28a745;
+}
+.negative-sentiment {
+    border-left: 3px solid #dc3545;
+}
+.neutral-sentiment {
+    border-left: 3px solid #6c757d;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    
+    // Load chat history
+    fetch('/chat/history')
+        .then(response => response.json())
+        .then(data => {
+            if (data.history) {
+                data.history.forEach(message => {
+                    if (message.type === 'user') {
+                        appendUserMessage(message.content, message.sentiment, message.confidence);
+                    } else {
+                        appendBotMessage(message.content);
+                    }
+                });
+                scrollToBottom();
+            }
+        })
+        .catch(error => console.error('Error loading history:', error));
+    
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Clear input
+        messageInput.value = '';
+        
+        // Display user message immediately
+        appendUserMessage(message);
+        scrollToBottom();
+        
+        // Send message to server
+        fetch('/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            // Update user message with sentiment
+            const lastUserMessage = chatMessages.lastElementChild;
+            if (lastUserMessage) {
+                updateMessageSentiment(lastUserMessage, data.sentiment, data.confidence);
+            }
+            // Display bot response
+            appendBotMessage(data.response);
+            scrollToBottom();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            appendErrorMessage('Failed to send message. Please try again.');
+        });
+    });
+    
+    function appendUserMessage(message, sentiment = null, confidence = null) {
+        const template = document.getElementById('userMessageTemplate');
+        const messageElement = template.content.cloneNode(true);
+        
+        messageElement.querySelector('.message-content').textContent = message;
+        if (sentiment && confidence) {
+            updateMessageSentiment(messageElement, sentiment, confidence);
+        }
+        
+        chatMessages.appendChild(messageElement);
+    }
+    
+    function appendBotMessage(message) {
+        const template = document.getElementById('botMessageTemplate');
+        const messageElement = template.content.cloneNode(true);
+        
+        messageElement.querySelector('.message-content').textContent = message;
+        
+        chatMessages.appendChild(messageElement);
+    }
+    
+    function updateMessageSentiment(messageElement, sentiment, confidence) {
+        const metadata = messageElement.querySelector('.message-metadata');
+        const content = messageElement.querySelector('.message-content');
+        
+        metadata.textContent = `Sentiment: ${sentiment.toLowerCase()} (${(confidence * 100).toFixed(1)}%)`;
+        content.classList.add(`${sentiment.toLowerCase()}-sentiment`);
+    }
+    
+    function appendErrorMessage(message) {
+        const div = document.createElement('div');
+        div.className = 'alert alert-danger mt-2';
+        div.textContent = message;
+        chatMessages.appendChild(div);
+        setTimeout(() => div.remove(), 5000);
+    }
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

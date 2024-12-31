@@ -80,6 +80,33 @@ class SentimentLog(db.Model):
     def __repr__(self):
         return f"<SentimentLog {self.Input_Text[:20]}... - {self.Sentiment}>"
     
+    
+class ChatSession(db.Model):
+    __tablename__ = 'chat_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    started_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    last_interaction = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    # Relationship to User
+    user = db.relationship('User', backref=db.backref('chat_sessions', lazy=True))
+    # Relationship to messages
+    messages = db.relationship('ChatMessage', backref='session', lazy=True)
+
+
+class ChatMessage(db.Model):
+    __tablename__ = 'chat_messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('chat_sessions.id'), nullable=False)
+    message_type = db.Column(db.String(10), nullable=False)  # 'user' or 'bot'
+    content = db.Column(db.Text, nullable=False)
+    sentiment = db.Column(db.String(20), nullable=True)
+    confidence = db.Column(db.Float, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
+
+    
 class AppConfig(db.Model):
     __tablename__ = 'app_config'
     key = db.Column(db.String(50), primary_key=True)
